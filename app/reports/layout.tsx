@@ -6,7 +6,7 @@ type Props = {
 
 function Reports({children}: Props) {
   return (
-    <main>{children}</main>
+    <main className="h-full overflow-hidden">{children}</main>
   )
 }
 
