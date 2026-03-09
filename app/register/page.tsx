@@ -54,7 +54,7 @@ export default function RegisterPage() {
       console.error("Registration error:", error.message);
       return;
     }
-
+    console.log("Registration successful:", data);
     setSubmitted(true);
   };
 
