@@ -8,7 +8,7 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="border-b border-slate-200 bg-white z-50">
+    <nav className="border-b border-slate-200 bg-white z-50 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo */}
         <Link
@@ -39,7 +39,11 @@ export function Navbar() {
 
         {/* Mobile hamburger */}
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => {
+            const next = !menuOpen;
+            setMenuOpen(next);
+            if (next) window.dispatchEvent(new CustomEvent('close-sidebar'));
+          }}
           className="sm:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors"
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -48,7 +52,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="sm:hidden border-t border-slate-100 bg-white px-4 py-3 space-y-2">
+        <div className="sm:hidden absolute top-full left-0 right-0 border-t border-slate-100 bg-white px-4 py-3 space-y-2 shadow-lg z-50">
           <a
             href="https://thesocialconsulting.agency"
             target="_blank"
