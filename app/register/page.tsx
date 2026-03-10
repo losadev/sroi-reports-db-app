@@ -39,22 +39,30 @@ export default function RegisterPage() {
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: {
-        data: {
-          org_name: form.orgName,
-          entity_type: form.entityType,
-          newsletter: form.newsletter,
-          sroi_info: form.sroiInfo,
-          download_only: form.downloadOnly,
-        },
-      },
     });
 
-    if (error) {
-      console.error("Registration error:", error.message);
+    if (error || !data.user) {
+      console.error("Registration error:", error?.message);
       return;
     }
-    console.log("Registration successful:", data);
+
+    console.log("User registered:", data.user);
+
+    const { error: insertError } = await supabase.from("User").insert({
+      auth_user: data.user.id,
+      email: data.user.email,
+      org_name: form.orgName,
+      entity_type: form.entityType,
+      newsletter: form.newsletter,
+      sroi_info: form.sroiInfo,
+      download_only: form.downloadOnly,
+    });
+
+    if (insertError) {
+      console.error("Insert error:", insertError.message);
+      return;
+    }
+
     setSubmitted(true);
   };
 

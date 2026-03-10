@@ -30,6 +30,7 @@ model Report {
 
 model User {
   id          String   @id @default(uuid())
+  auth_user   String   @unique @default(uuid()) // ID del usuario en Supabase Auth
   email       String   @unique
   password    String
   org_name    String
