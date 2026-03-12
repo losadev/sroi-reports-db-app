@@ -17,57 +17,6 @@ interface Report {
   created_at: string;
 }
 
-// Mock data for design preview
-const MOCK_REPORTS: Report[] = [
-  {
-    id: '1',
-    title: 'Global Economic Outlook 2025: Trends and Forecasts',
-    abstract: 'This comprehensive report examines the current state of the global economy and provides detailed forecasts for the coming year. Key areas of focus include inflation trends, employment rates, and GDP growth across major economies. The analysis incorporates data...',
-    thumbnail_url: 'https://images.unsplash.com/photo-1579532537598-459e26a7fa38?w=200&h=200&fit=crop',
-    file_url: '#',
-    accredited: true,
-    area: 'Economics',
-    country: 'Global',
-    publish_year: 2025,
-    created_at: '2025-03-15T00:00:00Z',
-  },
-  {
-    id: '2',
-    title: 'Climate Change Impact Assessment: Agriculture Sector',
-    abstract: 'An in-depth analysis of how climate change is affecting agricultural production worldwide. This report covers crop yield variations, water scarcity challenges, and adaptation strategies being implemented by farmers and governments. Special attention is given to vulnerable...',
-    thumbnail_url: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=200&h=200&fit=crop',
-    file_url: '#',
-    accredited: false,
-    area: 'Agriculture',
-    country: 'Global',
-    publish_year: 2025,
-    created_at: '2025-02-28T00:00:00Z',
-  },
-  {
-    id: '3',
-    title: 'Digital Transformation in Healthcare: A Global Perspective',
-    abstract: 'Exploring the rapid digitalization of healthcare services across developed and developing nations. Topics include telemedicine adoption rates, electronic health records implementation, AI-assisted diagnostics, and the regulatory frameworks governing digital health innovations...',
-    thumbnail_url: 'https://images.unsplash.com/photo-1576091160550-112173f7f869?w=200&h=200&fit=crop',
-    file_url: '#',
-    accredited: true,
-    area: 'Healthcare',
-    country: 'USA',
-    publish_year: 2025,
-    created_at: '2025-01-20T00:00:00Z',
-  },
-  {
-    id: '4',
-    title: 'Renewable Energy Transition: Policy and Implementation',
-    abstract: 'A comprehensive study of renewable energy policies and their real-world implementation across different regions. The report analyzes solar, wind, and hydroelectric projects, their efficiency rates, cost analysis, and environmental benefits. It also examines government incentives and international agreements...',
-    thumbnail_url: 'https://images.unsplash.com/photo-1509391366360-2e938f0deba0?w=200&h=200&fit=crop',
-    file_url: '#',
-    accredited: true,
-    area: 'Energy',
-    country: 'Europe',
-    publish_year: 2025,
-    created_at: '2025-01-10T00:00:00Z',
-  },
-];
 
 function ReportsPage() {
   // Applied filters (used for actual filtering)
@@ -78,7 +27,8 @@ function ReportsPage() {
   const [pendingSearch, setPendingSearch] = useState('');
   const [pendingAccredited, setPendingAccredited] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(false);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -86,6 +36,28 @@ function ReportsPage() {
     window.addEventListener('close-sidebar', handler);
     return () => window.removeEventListener('close-sidebar', handler);
   }, []);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (accredited !== null) params.append('accredited', accredited);
+
+      try {
+        const response = await fetch(`/api/reports?${params}`);
+        const json = await response.json();
+        setReports(json.data);
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timer = setTimeout(fetchReports, 300);
+    return () => clearTimeout(timer);
+  }, [search, accredited]);
 
   const isMobile = () => window.innerWidth < 768;
 
@@ -117,39 +89,6 @@ function ReportsPage() {
     setPendingAccredited(accredited);
     setSidebarOpen(!sidebarOpen);
   };
-
-  // Filter mock data based on search and accreditation
-  const filteredReports = MOCK_REPORTS.filter((report) => {
-    const matchesSearch =
-      search === '' ||
-      report.title.toLowerCase().includes(search.toLowerCase()) ||
-      report.abstract.toLowerCase().includes(search.toLowerCase());
-
-    const matchesAccreditation =
-      accredited === null || report.accredited === (accredited === 'true');
-
-    return matchesSearch && matchesAccreditation;
-  });
-
-  // TODO: Uncomment when API is ready and remove mock data filtering
-  /*
-  useEffect(() => {
-    const fetchReports = async () => {
-      setLoading(true);
-      const params = new URLSearchParams();
-      if (search) params.append('search', search);
-      if (accredited !== null) params.append('accredited', accredited);
-
-      const response = await fetch(`/api/reports?${params}`);
-      const data = await response.json();
-      setReports(data);
-      setLoading(false);
-    };
-
-    const timer = setTimeout(fetchReports, 300);
-    return () => clearTimeout(timer);
-  }, [search, accredited]);
-  */
 
   return (
     <div className="flex h-full bg-gradient-to-br from-slate-50 via-white to-slate-50 overflow-hidden relative">
@@ -275,7 +214,7 @@ function ReportsPage() {
         {/* Results count */}
         <div className="border-t border-slate-100 px-6 py-4">
           <p className="text-sm text-slate-600">
-            <span className="font-semibold text-slate-900">{filteredReports.length}</span>{' '}
+            <span className="font-semibold text-slate-900">{reports.length}</span>{' '}
             reportes encontrados
           </p>
         </div>
@@ -323,7 +262,7 @@ function ReportsPage() {
                 <p className="text-slate-600">Cargando reportes...</p>
               </div>
             </div>
-          ) : filteredReports.length === 0 ? (
+          ) : reports.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-slate-500">
                 <p className="text-lg font-medium mb-1">No hay reportes</p>
@@ -332,7 +271,7 @@ function ReportsPage() {
             </div>
           ) : (
             <div className="divide-y divide-slate-200">
-              {filteredReports.map((report, index) => (
+              {reports.map((report, index) => (
                 <div
                   key={report.id}
                   className="animate-in fade-in slide-in-from-bottom-4"

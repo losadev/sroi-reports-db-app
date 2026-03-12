@@ -14,29 +14,35 @@ datasource db {
 }
 
 model Report {
-  id          String   @id @default(uuid())
-  title       String
-  abstract    String   // resumen corto para el listado
-  summary     String   // resumen largo para detalle
+  id            String   @id @default(uuid())
+  title         String
+  abstract      String // resumen corto para el listado
+  summary       String // resumen largo para detalle
   thumbnail_url String // miniatura en R2
-  file_url    String   // PDF en R2
-  area        String   // filtro principal
-  tags        String[] // array de etiquetas
-  accredited  Boolean  // boolean
-  country     String
-  publish_year Int
-  created_at  DateTime @default(now())
+  file_url      String // PDF en R2
+  area          String // filtro principal
+  tags          String[] // array de etiquetas
+  accredited    Boolean // boolean
+  country       String
+  publish_year  Int
+  created_at    DateTime @default(now()) @db.Timestamptz
+
+  @@index([area])
+  @@index([country])
+  @@index([accredited])
+  @@index([created_at])
 }
 
 model User {
-  id          String   @id @default(uuid())
-  auth_user   String   @unique @default(uuid()) // ID del usuario en Supabase Auth
-  email       String   @unique
-  password    String
-  org_name    String
-  entity_type String
-  newsletter   Boolean
-  sroi_info    Boolean
+  id            String   @id @default(uuid())
+  auth_user     String   @unique // ID del usuario en Supabase Auth
+  email         String   @unique
+  org_name      String
+  entity_type   String
+  newsletter    Boolean
+  sroi_info     Boolean
   download_only Boolean
-  created_at   DateTime @default(now())
+  created_at    DateTime @default(now()) @db.Timestamptz
+
+  @@index([entity_type])
 }
