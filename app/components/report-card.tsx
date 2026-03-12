@@ -1,4 +1,5 @@
 import { ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 
 interface ReportCardProps {
   id: string;
@@ -10,6 +11,7 @@ interface ReportCardProps {
 }
 
 export function ReportCard({
+  id,
   title,
   date,
   abstract,
@@ -45,13 +47,13 @@ export function ReportCard({
           {abstract}
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          <a
-            href="#"
+          <Link
+            href={`/reports/${id}`}
             className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors inline-flex items-center gap-1"
           >
-            Read more
+            Leer más
             <ExternalLink size={14} />
-          </a>
+          </Link>
           {/* Button visible inline on mobile */}
           <a
             href={file_url}
@@ -59,7 +61,7 @@ export function ReportCard({
             rel="noopener noreferrer"
             className="sm:hidden px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors whitespace-nowrap"
           >
-            View report summary
+            Ver reporte
           </a>
         </div>
       </div>
@@ -72,7 +74,7 @@ export function ReportCard({
           rel="noopener noreferrer"
           className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors whitespace-nowrap"
         >
-          View report summary
+          Ver reporte
         </a>
       </div>
     </div>

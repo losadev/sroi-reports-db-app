@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 {
   "title": "Título completo del reporte",
   "abstract": "Resumen corto de 2-3 frases para un listado de reportes",
-  "summary": "Resumen detallado de 1-2 párrafos con los hallazgos principales, metodología y conclusiones",
+  "summary": "Resumen largo y detallado (mínimo 3-4 párrafos extensos). Debe cubrir: contexto y antecedentes de la organización, descripción del programa/modelo evaluado, metodología SROI utilizada (tipo de análisis, periodo evaluado, ratio SROI obtenido y rango de sensibilidad), resultados clave desglosados por cada grupo de interés (stakeholders), y conclusiones sobre el impacto social generado. Escríbelo de forma narrativa y profesional, similar a un abstract académico extenso.",
   "area": "Área temática principal (una de: Educación, Salud, Medio ambiente, Empleo, Vivienda, Cultura, Deporte, Inclusión social, Cooperación internacional, Otro)",
   "country": "País donde se realizó el estudio",
   "publish_year": 2024,

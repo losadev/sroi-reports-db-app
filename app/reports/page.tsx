@@ -282,11 +282,7 @@ function ReportsPage() {
                   <ReportCard
                     id={report.id}
                     title={report.title}
-                    date={new Date(report.created_at).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+                    date={String(report.publish_year)}
                     abstract={report.abstract}
                     thumbnail_url={report.thumbnail_url}
                     file_url={report.file_url}
