@@ -1,4 +1,14 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:\\\\Users\\\\Pablo\\\\Desktop\\\\Proyectos Coding\\\\sroi-reports-db-app\" && bun prisma generate 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Pablo\\\\Desktop\\\\Proyectos Coding\\\\sroi-reports-db-app\" && bun build 2>&1 | tail -30)",
+      "Bash(cd \"C:\\\\Users\\\\Pablo\\\\Desktop\\\\Proyectos Coding\\\\sroi-reports-db-app\" && npx next build 2>&1 | tail -30)",
+      "Bash(cd \"C:\\\\Users\\\\Pablo\\\\Desktop\\\\Proyectos Coding\\\\sroi-reports-db-app\" && bun add @prisma/pg 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Pablo\\\\Desktop\\\\Proyectos Coding\\\\sroi-reports-db-app\" && bun add @prisma/adapter-pg 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Pablo\\\\Desktop\\\\Proyectos Coding\\\\sroi-reports-db-app\" && npx next build 2>&1 | tail -20)"
+    ]
+  },
   "hooks": {
     "Notification": [
       {
