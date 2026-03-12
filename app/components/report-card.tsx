@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 
 interface ReportCardProps {
@@ -45,13 +46,13 @@ export function ReportCard({
           {abstract}
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          <a
-            href="#"
+          <Link
+            href={`/reports/${id}`}
             className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors inline-flex items-center gap-1"
           >
-            Read more
+            Leer más
             <ExternalLink size={14} />
-          </a>
+          </Link>
           {/* Button visible inline on mobile */}
           <a
             href={file_url}
