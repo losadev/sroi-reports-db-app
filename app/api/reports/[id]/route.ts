@@ -11,7 +11,7 @@ export async function GET(
 
     if (!report) {
       return NextResponse.json(
-        { error: "Reporte no encontrado" },
+        { error: "Informe no encontrado" },
         { status: 404 },
       );
     }
@@ -20,7 +20,7 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching report:", error);
     return NextResponse.json(
-      { error: "Error al obtener el reporte" },
+      { error: "Error al obtener el informe" },
       { status: 500 },
     );
   }

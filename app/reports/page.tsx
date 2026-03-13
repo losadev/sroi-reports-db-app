@@ -1,31 +1,55 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Filter, X, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Search, Filter, X, PanelLeftClose, PanelLeftOpen, ChevronDown } from 'lucide-react';
 import { ReportCard } from '@/app/components/report-card';
 
+// Tipos para los nuevos campos
 interface Report {
   id: string;
   title: string;
   abstract: string;
   thumbnail_url: string;
   file_url: string;
-  accredited: boolean;
+  accreditation: string | null;
+  organization: string | null;
+  editors: string | null;
+  budget_range: string | null;
   area: string;
   country: string;
   publish_year: number;
   created_at: string;
 }
 
+// Opciones de acreditación
+const ACCREDITATION_OPTIONS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'ACCREDITED', label: 'Acreditado' },
+  { value: 'NO_ACCREDITED', label: 'No Acreditado' },
+];
+
+// Opciones de rango de presupuesto
+const BUDGET_OPTIONS = [
+  { value: '', label: 'Cualquier presupuesto' },
+  { value: 'RANGE_0_50000', label: 'Hasta $50K' },
+  { value: 'RANGE_50001_100000', label: '$50K - $100K' },
+  { value: 'RANGE_100001_250000', label: '$100K - $250K' },
+  { value: 'RANGE_250001_500000', label: '$250K - $500K' },
+  { value: 'RANGE_500001_1000000', label: '$500K - $1M' },
+  { value: 'RANGE_1000001_PLUS', label: 'Más de $1M' },
+];
+
 
 function ReportsPage() {
   // Applied filters (used for actual filtering)
   const [search, setSearch] = useState('');
-  const [accredited, setAccredited] = useState<string | null>(null);
+  const [accreditation, setAccreditation] = useState<string | null>(null);
+  const [budgetRange, setBudgetRange] = useState<string | null>(null);
 
   // Pending filters (mobile only, applied on sidebar close)
   const [pendingSearch, setPendingSearch] = useState('');
-  const [pendingAccredited, setPendingAccredited] = useState<string | null>(null);
+  const [pendingAccreditation, setPendingAccreditation] = useState<string | null>(null);
+  const [pendingBudgetRange, setPendingBudgetRange] = useState<string | null>(null);
 
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +66,8 @@ function ReportsPage() {
       setLoading(true);
       const params = new URLSearchParams();
       if (search) params.append('search', search);
-      if (accredited !== null) params.append('accredited', accredited);
+      if (accreditation !== null) params.append('accreditation', accreditation);
+      if (budgetRange) params.append('budgetRange', budgetRange);
 
       try {
         const response = await fetch(`/api/reports?${params}`);
@@ -57,13 +82,14 @@ function ReportsPage() {
 
     const timer = setTimeout(fetchReports, 300);
     return () => clearTimeout(timer);
-  }, [search, accredited]);
+  }, [search, accreditation, budgetRange]);
 
   const isMobile = () => window.innerWidth < 768;
 
   const applyFilters = () => {
     setSearch(pendingSearch);
-    setAccredited(pendingAccredited);
+    setAccreditation(pendingAccreditation);
+    setBudgetRange(pendingBudgetRange);
   };
 
   const closeSidebarOnMobile = () => {
@@ -78,15 +104,22 @@ function ReportsPage() {
     if (!isMobile()) setSearch(value);
   };
 
-  const handleAccreditedChange = (value: string | null) => {
-    setPendingAccredited(value);
-    if (!isMobile()) setAccredited(value);
+  const handleAccreditationChange = (value: string | null) => {
+    const apiValue = value === 'all' ? null : value;
+    setPendingAccreditation(apiValue);
+    if (!isMobile()) setAccreditation(apiValue);
+  };
+
+  const handleBudgetRangeChange = (value: string | null) => {
+    setPendingBudgetRange(value);
+    if (!isMobile()) setBudgetRange(value);
   };
 
   const handleOpenSidebar = () => {
     // Sync pending with current applied filters when opening
     setPendingSearch(search);
-    setPendingAccredited(accredited);
+    setPendingAccreditation(accreditation);
+    setPendingBudgetRange(budgetRange);
     setSidebarOpen(!sidebarOpen);
   };
 
@@ -162,51 +195,58 @@ function ReportsPage() {
             </button>
           </div>
 
-          {/* Accreditation Filter */}
+          {/* Accreditation Filter - Dropdown */}
           <div>
             <label className="text-sm font-semibold text-slate-900 mb-3 block">
               Acreditación
             </label>
-            <div className="space-y-2.5">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="accredited"
-                  value="all"
-                  checked={pendingAccredited === null}
-                  onChange={() => { handleAccreditedChange(null); closeSidebarOnMobile(); }}
-                  className="w-4 h-4 accent-blue-500"
-                />
-                <span className="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">
-                  Todos
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="accredited"
-                  value="true"
-                  checked={pendingAccredited === 'true'}
-                  onChange={() => { handleAccreditedChange('true'); closeSidebarOnMobile(); }}
-                  className="w-4 h-4 accent-green-500"
-                />
-                <span className="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">
-                  Acreditado
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="radio"
-                  name="accredited"
-                  value="false"
-                  checked={pendingAccredited === 'false'}
-                  onChange={() => { handleAccreditedChange('false'); closeSidebarOnMobile(); }}
-                  className="w-4 h-4 accent-slate-400"
-                />
-                <span className="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">
-                  No acreditado
-                </span>
-              </label>
+            <div className="relative">
+              <select
+                value={pendingAccreditation === null ? 'all' : pendingAccreditation}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleAccreditationChange(value === 'all' ? null : value);
+                  closeSidebarOnMobile();
+                }}
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm appearance-none bg-white"
+              >
+                {ACCREDITATION_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={18}
+                className="absolute right-3 top-3 text-slate-400 pointer-events-none"
+              />
+            </div>
+          </div>
+
+          {/* Budget Range Filter - Dropdown */}
+          <div>
+            <label className="text-sm font-semibold text-slate-900 mb-3 block">
+              Presupuesto
+            </label>
+            <div className="relative">
+              <select
+                value={pendingBudgetRange || ''}
+                onChange={(e) => {
+                  handleBudgetRangeChange(e.target.value || null);
+                  closeSidebarOnMobile();
+                }}
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm appearance-none bg-white"
+              >
+                {BUDGET_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={18}
+                className="absolute right-3 top-3 text-slate-400 pointer-events-none"
+              />
             </div>
           </div>
         </div>
@@ -215,7 +255,7 @@ function ReportsPage() {
         <div className="border-t border-slate-100 px-6 py-4">
           <p className="text-sm text-slate-600">
             <span className="font-semibold text-slate-900">{reports.length}</span>{' '}
-            reportes encontrados
+            informes encontrados
           </p>
         </div>
 
@@ -247,9 +287,9 @@ function ReportsPage() {
               <span className="text-sm font-medium">Filtros</span>
             </button>
           </div>
-          <h1 className="hidden sm:block text-3xl font-bold text-slate-900">Reportes SROI</h1>
+          <h1 className="hidden sm:block text-3xl font-bold text-slate-900">Informes SROI</h1>
           <p className="hidden sm:block text-base text-slate-600 mt-1">
-            Base de datos de reportes de Retorno Social de la Inversión
+            Base de datos de informes de Retorno Social de la Inversión
           </p>
         </div>
 
@@ -259,13 +299,13 @@ function ReportsPage() {
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-slate-600">Cargando reportes...</p>
+                <p className="text-slate-600">Cargando informes...</p>
               </div>
             </div>
           ) : reports.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-slate-500">
-                <p className="text-lg font-medium mb-1">No hay reportes</p>
+                <p className="text-lg font-medium mb-1">No hay informes</p>
                 <p className="text-sm">Intenta cambiar tus filtros</p>
               </div>
             </div>
@@ -286,6 +326,10 @@ function ReportsPage() {
                     abstract={report.abstract}
                     thumbnail_url={report.thumbnail_url}
                     file_url={report.file_url}
+                    accreditation={report.accreditation}
+                    organization={report.organization}
+                    editors={report.editors}
+                    budget_range={report.budget_range}
                   />
                 </div>
               ))}

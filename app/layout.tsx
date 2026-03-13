@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SROI Reports",
-  description: "Base de datos de reportes de Social Return on Investment",
+  description: "Base de datos de informes de Social Return on Investment",
 };
 
 export default function RootLayout({

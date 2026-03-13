@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, Mail, Lock, ArrowRight, ChevronDown } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import {
+  Building2,
+  Mail,
+  Lock,
+  ArrowRight,
+  ChevronDown,
+  Loader2,
+} from "lucide-react";
+import { registerUser } from "./actions";
 
 const ENTITY_TYPES = [
   "Universidad / Investigación",
@@ -14,7 +22,6 @@ const ENTITY_TYPES = [
 ];
 
 export default function RegisterPage() {
-  const supabase = createClient();
   const [form, setForm] = useState({
     orgName: "",
     entityType: "",
@@ -25,6 +32,8 @@ export default function RegisterPage() {
     downloadOnly: false,
   });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -36,30 +45,23 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data, error } = await supabase.auth.signUp({
+    setError(null);
+    setLoading(true);
+
+    const result = await registerUser({
       email: form.email,
       password: form.password,
-    });
-
-    if (error || !data.user) {
-      console.error("Registration error:", error?.message);
-      return;
-    }
-
-    console.log("User registered:", data.user);
-
-    const { error: insertError } = await supabase.from("User").insert({
-      auth_user: data.user.id,
-      email: data.user.email,
-      org_name: form.orgName,
-      entity_type: form.entityType,
+      orgName: form.orgName,
+      entityType: form.entityType,
       newsletter: form.newsletter,
-      sroi_info: form.sroiInfo,
-      download_only: form.downloadOnly,
+      sroiInfo: form.sroiInfo,
+      downloadOnly: form.downloadOnly,
     });
 
-    if (insertError) {
-      console.error("Insert error:", insertError.message);
+    setLoading(false);
+
+    if (result.error) {
+      setError(result.error);
       return;
     }
 
@@ -104,7 +106,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Crear cuenta</h1>
           <p className="text-slate-600 mt-2">
-            Regístrate para acceder a los reportes SROI
+            Regístrate para acceder a los informes SROI
           </p>
         </div>
 
@@ -275,22 +277,40 @@ export default function RegisterPage() {
             </label>
           </div>
 
+          {/* Error message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+              {error}
+            </div>
+          )}
+
           {/* Row 4: Botones */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
-              Registrarse
-              <ArrowRight size={16} />
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Registrando...
+                </>
+              ) : (
+                <>
+                  Registrarse
+                  <ArrowRight size={16} />
+                </>
+              )}
             </button>
 
             <button
               type="button"
+              disabled={loading}
               onClick={() => {
                 /* TODO: Google OAuth */
               }}
-              className="w-full flex items-center justify-center gap-3 py-2.5 border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-3 py-2.5 border border-slate-300 hover:bg-slate-50 disabled:opacity-50 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path
@@ -316,6 +336,16 @@ export default function RegisterPage() {
             </button>
           </div>
         </form>
+
+        <p className="text-center text-sm text-slate-600 mt-6">
+          ¿Ya tienes cuenta?{" "}
+          <Link
+            href="/login"
+            className="font-semibold text-blue-600 hover:text-blue-700"
+          >
+            Iniciar sesión
+          </Link>
+        </p>
       </div>
     </div>
   );

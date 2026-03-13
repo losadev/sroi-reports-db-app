@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, Download, Loader2, Building2, Users, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 
 interface Report {
@@ -13,10 +13,33 @@ interface Report {
   file_url: string;
   area: string;
   tags: string[];
-  accredited: boolean;
+  accreditation: string | null;
+  organization: string | null;
+  editors: string | null;
+  budget_range: string | null;
   country: string;
   publish_year: number;
   created_at: string;
+}
+
+// Helper para formatear el rango de presupuesto
+function formatBudgetRange(budgetRange: string | null) {
+  if (!budgetRange) return null;
+  const labels: Record<string, string> = {
+    'RANGE_0_50000': 'Hasta $50K',
+    'RANGE_50001_100000': '$50K - $100K',
+    'RANGE_100001_250000': '$100K - $250K',
+    'RANGE_250001_500000': '$250K - $500K',
+    'RANGE_500001_1000000': '$500K - $1M',
+    'RANGE_1000001_PLUS': 'Más de $1M',
+  };
+  return labels[budgetRange] || budgetRange;
+}
+
+// Helper para mostrar la acreditación
+function getAccreditationLabel(accreditation: string | null) {
+  if (!accreditation || accreditation === 'NO_ACCREDITED') return null;
+  return 'Acreditado';
 }
 
 export default function ReportDetailPage() {
@@ -29,11 +52,11 @@ export default function ReportDetailPage() {
     const fetchReport = async () => {
       try {
         const response = await fetch(`/api/reports/${id}`);
-        if (!response.ok) throw new Error('Reporte no encontrado');
+        if (!response.ok) throw new Error('Informe no encontrado');
         const data = await response.json();
         setReport(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al cargar el reporte');
+        setError(err instanceof Error ? err.message : 'Error al cargar el informe');
       } finally {
         setLoading(false);
       }
@@ -47,7 +70,7 @@ export default function ReportDetailPage() {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <Loader2 className="w-10 h-10 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-slate-600">Cargando reporte...</p>
+          <p className="text-slate-600">Cargando informe...</p>
         </div>
       </div>
     );
@@ -58,13 +81,13 @@ export default function ReportDetailPage() {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <p className="text-lg font-medium text-slate-900 mb-2">
-            {error || 'Reporte no encontrado'}
+            {error || 'Informe no encontrado'}
           </p>
           <Link
             href="/reports"
             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            Volver a reportes
+            Volver a informes
           </Link>
         </div>
       </div>
@@ -80,7 +103,7 @@ export default function ReportDetailPage() {
           className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors mb-6"
         >
           <ArrowLeft size={16} />
-          Volver a reportes
+          Volver a informes
         </Link>
 
         {/* Title */}
@@ -89,19 +112,43 @@ export default function ReportDetailPage() {
         </h1>
 
         {/* Meta */}
-        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 mb-8">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 mb-4">
           <span>{report.country}</span>
           <span className="text-slate-300">·</span>
           <span>{report.publish_year}</span>
           <span className="text-slate-300">·</span>
           <span>{report.area}</span>
-          {report.accredited && (
+          {getAccreditationLabel(report.accreditation) && (
             <>
               <span className="text-slate-300">·</span>
               <span className="text-green-600 font-medium">Acreditado</span>
             </>
           )}
         </div>
+
+        {/* New fields display */}
+        {(report.organization || report.editors || report.budget_range) && (
+          <div className="flex flex-wrap items-center gap-4 mb-6 text-sm">
+            {report.organization && (
+              <div className="flex items-center gap-2 text-slate-600">
+                <Building2 size={16} className="text-slate-400" />
+                <span>{report.organization}</span>
+              </div>
+            )}
+            {report.editors && (
+              <div className="flex items-center gap-2 text-slate-600">
+                <Users size={16} className="text-slate-400" />
+                <span>{report.editors}</span>
+              </div>
+            )}
+            {report.budget_range && (
+              <div className="flex items-center gap-2 text-slate-600">
+                <DollarSign size={16} className="text-slate-400" />
+                <span>{formatBudgetRange(report.budget_range)}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Summary + Thumbnail */}
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 mb-10">
@@ -143,7 +190,7 @@ export default function ReportDetailPage() {
           className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg transition-colors"
         >
           <Download size={18} />
-          Descargar reporte
+          Descargar informe
         </a>
       </div>
     </div>

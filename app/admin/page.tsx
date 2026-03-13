@@ -14,6 +14,9 @@ import {
   AlertCircle,
   Loader2,
   Sparkles,
+  Building2,
+  Users,
+  DollarSign,
 } from "lucide-react";
 
 const AREAS = [
@@ -29,6 +32,24 @@ const AREAS = [
   "Otro",
 ];
 
+// Opciones de acreditación
+const ACCREDITATION_OPTIONS = [
+  { value: "", label: "Sin acreditación" },
+  { value: "ACCREDITED", label: "Acreditado" },
+  { value: "NO_ACCREDITED", label: "No Acreditado" },
+];
+
+// Opciones de rango de presupuesto
+const BUDGET_OPTIONS = [
+  { value: "", label: "Seleccionar presupuesto" },
+  { value: "RANGE_0_50000", label: "Hasta $50K" },
+  { value: "RANGE_50001_100000", label: "$50K - $100K" },
+  { value: "RANGE_100001_250000", label: "$100K - $250K" },
+  { value: "RANGE_250001_500000", label: "$250K - $500K" },
+  { value: "RANGE_500001_1000000", label: "$500K - $1M" },
+  { value: "RANGE_1000001_PLUS", label: "Más de $1M" },
+];
+
 const CURRENT_YEAR = new Date().getFullYear().toString();
 
 export default function AdminPage() {
@@ -39,7 +60,10 @@ export default function AdminPage() {
     area: "",
     country: "",
     publish_year: CURRENT_YEAR,
-    accredited: false,
+    accreditation: "",
+    editors: "",
+    organization: "",
+    budget_range: "",
     tags: "",
   });
   const [pdf, setPdf] = useState<File | null>(null);
@@ -104,7 +128,10 @@ export default function AdminPage() {
         publish_year: extracted.publish_year
           ? String(extracted.publish_year)
           : CURRENT_YEAR,
-        accredited: extracted.accredited || false,
+        accreditation: extracted.accreditation || "",
+        editors: extracted.editors || "",
+        organization: extracted.organization || "",
+        budget_range: extracted.budget_range || "",
         tags: Array.isArray(extracted.tags) ? extracted.tags.join(", ") : "",
       });
 
@@ -137,7 +164,10 @@ export default function AdminPage() {
     formData.append("area", form.area);
     formData.append("country", form.country);
     formData.append("publish_year", form.publish_year);
-    formData.append("accredited", String(form.accredited));
+    formData.append("accreditation", form.accreditation);
+    formData.append("editors", form.editors);
+    formData.append("organization", form.organization);
+    formData.append("budgetRange", form.budget_range);
     formData.append(
       "tags",
       JSON.stringify(
@@ -158,10 +188,10 @@ export default function AdminPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Error al crear el reporte");
+        throw new Error(data.error || "Error al crear el informe");
       }
 
-      setResult({ ok: true, message: "Reporte creado correctamente" });
+      setResult({ ok: true, message: "Informe creado correctamente" });
       setForm({
         title: "",
         abstract: "",
@@ -169,7 +199,10 @@ export default function AdminPage() {
         area: "",
         country: "",
         publish_year: CURRENT_YEAR,
-        accredited: false,
+        accreditation: "",
+        editors: "",
+        organization: "",
+        budget_range: "",
         tags: "",
       });
       setPdf(null);
@@ -189,9 +222,9 @@ export default function AdminPage() {
     <div className="h-full overflow-y-auto">
       <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Subir reporte</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Subir informe</h1>
           <p className="text-slate-600 mt-2">
-            Completa los datos del reporte SROI y sube los archivos
+            Completa los datos del informe SROI y sube los archivos
           </p>
         </div>
 
@@ -238,7 +271,7 @@ export default function AdminPage() {
                 required
                 value={form.title}
                 onChange={handleChange}
-                placeholder="Título del reporte SROI"
+                placeholder="Título del informe SROI"
                 className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
               />
             </div>
@@ -259,7 +292,7 @@ export default function AdminPage() {
               rows={3}
               value={form.abstract}
               onChange={handleChange}
-              placeholder="Resumen breve para el listado de reportes..."
+              placeholder="Resumen breve para el listado de informes..."
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm resize-none"
             />
           </div>
@@ -344,8 +377,8 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Año + Acreditado */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Año + Acreditación + Presupuesto */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div>
               <label
                 htmlFor="publish_year"
@@ -372,19 +405,115 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="flex items-end pb-1">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="accredited"
-                  checked={form.accredited}
-                  onChange={handleChange}
-                  className="w-4 h-4 accent-green-500 cursor-pointer"
-                />
-                <span className="text-sm font-semibold text-slate-900 group-hover:text-slate-700 transition-colors">
-                  Reporte acreditado
-                </span>
+            <div>
+              <label
+                htmlFor="accreditation"
+                className="text-sm font-semibold text-slate-900 mb-2 block"
+              >
+                Acreditación
               </label>
+              <div className="relative">
+                <ChevronDown
+                  size={18}
+                  className="absolute right-3 top-3 text-slate-400 pointer-events-none"
+                />
+                <select
+                  id="accreditation"
+                  name="accreditation"
+                  value={form.accreditation}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm appearance-none bg-white"
+                >
+                  {ACCREDITATION_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="budget_range"
+                className="text-sm font-semibold text-slate-900 mb-2 block"
+              >
+                Presupuesto
+              </label>
+              <div className="relative">
+                <DollarSign
+                  size={18}
+                  className="absolute left-3 top-3 text-slate-400"
+                />
+                <ChevronDown
+                  size={18}
+                  className="absolute right-3 top-3 text-slate-400 pointer-events-none"
+                />
+                <select
+                  id="budget_range"
+                  name="budget_range"
+                  value={form.budget_range}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-8 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm appearance-none bg-white"
+                >
+                  {BUDGET_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Editors + Organization */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label
+                htmlFor="organization"
+                className="text-sm font-semibold text-slate-900 mb-2 block"
+              >
+                Organización
+              </label>
+              <div className="relative">
+                <Building2
+                  size={18}
+                  className="absolute left-3 top-3 text-slate-400"
+                />
+                <input
+                  id="organization"
+                  name="organization"
+                  type="text"
+                  value={form.organization}
+                  onChange={handleChange}
+                  placeholder="Nombre de la organización"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="editors"
+                className="text-sm font-semibold text-slate-900 mb-2 block"
+              >
+                Editores / Autores
+              </label>
+              <div className="relative">
+                <Users
+                  size={18}
+                  className="absolute left-3 top-3 text-slate-400"
+                />
+                <input
+                  id="editors"
+                  name="editors"
+                  type="text"
+                  value={form.editors}
+                  onChange={handleChange}
+                  placeholder="Nombres de editores o autores"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                />
+              </div>
             </div>
           </div>
 
@@ -418,7 +547,7 @@ export default function AdminPage() {
             {/* PDF */}
             <div>
               <label className="text-sm font-semibold text-slate-900 mb-2 block">
-                PDF del reporte <span className="text-red-500">*</span>
+                PDF del informe <span className="text-red-500">*</span>
               </label>
               <label className="flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer">
                 <Upload size={24} className="text-slate-400" />
@@ -519,7 +648,7 @@ export default function AdminPage() {
             ) : (
               <>
                 <Upload size={16} />
-                Subir reporte
+                Subir informe
               </>
             )}
           </button>
