@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Navbar } from "./components/navbar";
+import { NavbarSkeleton } from "./components/navbar-skeleton";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -31,7 +33,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen overflow-hidden flex flex-col`}
       >
-        <Navbar />
+        <Suspense fallback={<NavbarSkeleton />}>
+          <Navbar />
+        </Suspense>
         <div className="flex-1 overflow-hidden">
           {children}
         </div>

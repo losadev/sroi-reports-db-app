@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import React, { Suspense, useEffect, useState } from 'react';
 import { ArrowLeft, Download, Loader2, Building2, Users, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 
@@ -42,8 +41,8 @@ function getAccreditationLabel(accreditation: string | null) {
   return 'Acreditado';
 }
 
-export default function ReportDetailPage() {
-  const { id } = useParams<{ id: string }>();
+function ReportDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -194,5 +193,22 @@ export default function ReportDetailPage() {
         </a>
       </div>
     </div>
+  );
+}
+
+export default function ReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <Loader2 className="w-10 h-10 animate-spin text-blue-500 mx-auto mb-4" />
+            <p className="text-slate-600">Cargando informe...</p>
+          </div>
+        </div>
+      }
+    >
+      <ReportDetail params={params} />
+    </Suspense>
   );
 }
