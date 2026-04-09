@@ -148,7 +148,11 @@ export default function AdminPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("handleSubmit called", { pdf: !!pdf, thumbnail: !!thumbnail, form });
+    console.log("handleSubmit called", {
+      pdf: !!pdf,
+      thumbnail: !!thumbnail,
+      form,
+    });
     if (!pdf || !thumbnail) {
       setResult({ ok: false, message: "PDF y miniatura son obligatorios" });
       return;
@@ -232,11 +236,7 @@ export default function AdminPage() {
           <div
             className={`flex items-center gap-3 p-4 rounded-lg mb-6 ${result.ok ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}
           >
-            {result.ok ? (
-              <CheckCircle size={20} />
-            ) : (
-              <AlertCircle size={20} />
-            )}
+            {result.ok ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
             <p className="text-sm font-medium">{result.message}</p>
             <button
               onClick={() => setResult(null)}
@@ -526,10 +526,7 @@ export default function AdminPage() {
               Etiquetas
             </label>
             <div className="relative">
-              <Tag
-                size={18}
-                className="absolute left-3 top-3 text-slate-400"
-              />
+              <Tag size={18} className="absolute left-3 top-3 text-slate-400" />
               <input
                 id="tags"
                 name="tags"

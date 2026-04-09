@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Search, Filter, X, PanelLeftClose, PanelLeftOpen, ChevronDown } from 'lucide-react';
-import { ReportCard } from '@/app/components/report-card';
+import { useEffect, useState } from "react";
+import {
+  Search,
+  Filter,
+  X,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ChevronDown,
+} from "lucide-react";
+import { ReportCard } from "@/app/components/report-card";
 
 // Tipos para los nuevos campos
 interface Report {
@@ -23,33 +30,36 @@ interface Report {
 
 // Opciones de acreditación
 const ACCREDITATION_OPTIONS = [
-  { value: 'all', label: 'Todos' },
-  { value: 'ACCREDITED', label: 'Acreditado' },
-  { value: 'NO_ACCREDITED', label: 'No Acreditado' },
+  { value: "all", label: "Todos" },
+  { value: "ACCREDITED", label: "Acreditado" },
+  { value: "NO_ACCREDITED", label: "No Acreditado" },
 ];
 
 // Opciones de rango de presupuesto
 const BUDGET_OPTIONS = [
-  { value: '', label: 'Cualquier presupuesto' },
-  { value: 'RANGE_0_50000', label: 'Hasta $50K' },
-  { value: 'RANGE_50001_100000', label: '$50K - $100K' },
-  { value: 'RANGE_100001_250000', label: '$100K - $250K' },
-  { value: 'RANGE_250001_500000', label: '$250K - $500K' },
-  { value: 'RANGE_500001_1000000', label: '$500K - $1M' },
-  { value: 'RANGE_1000001_PLUS', label: 'Más de $1M' },
+  { value: "", label: "Cualquier presupuesto" },
+  { value: "RANGE_0_50000", label: "Hasta $50K" },
+  { value: "RANGE_50001_100000", label: "$50K - $100K" },
+  { value: "RANGE_100001_250000", label: "$100K - $250K" },
+  { value: "RANGE_250001_500000", label: "$250K - $500K" },
+  { value: "RANGE_500001_1000000", label: "$500K - $1M" },
+  { value: "RANGE_1000001_PLUS", label: "Más de $1M" },
 ];
-
 
 function ReportsPage() {
   // Applied filters (used for actual filtering)
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [accreditation, setAccreditation] = useState<string | null>(null);
   const [budgetRange, setBudgetRange] = useState<string | null>(null);
 
   // Pending filters (mobile only, applied on sidebar close)
-  const [pendingSearch, setPendingSearch] = useState('');
-  const [pendingAccreditation, setPendingAccreditation] = useState<string | null>(null);
-  const [pendingBudgetRange, setPendingBudgetRange] = useState<string | null>(null);
+  const [pendingSearch, setPendingSearch] = useState("");
+  const [pendingAccreditation, setPendingAccreditation] = useState<
+    string | null
+  >(null);
+  const [pendingBudgetRange, setPendingBudgetRange] = useState<string | null>(
+    null,
+  );
 
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,24 +67,25 @@ function ReportsPage() {
 
   useEffect(() => {
     const handler = () => setSidebarOpen(false);
-    window.addEventListener('close-sidebar', handler);
-    return () => window.removeEventListener('close-sidebar', handler);
+    window.addEventListener("close-sidebar", handler);
+    return () => window.removeEventListener("close-sidebar", handler);
   }, []);
 
   useEffect(() => {
     const fetchReports = async () => {
       setLoading(true);
       const params = new URLSearchParams();
-      if (search) params.append('search', search);
-      if (accreditation !== null) params.append('accreditation', accreditation);
-      if (budgetRange) params.append('budgetRange', budgetRange);
+      if (search) params.append("search", search);
+      if (accreditation !== null) params.append("accreditation", accreditation);
+      if (budgetRange) params.append("budgetRange", budgetRange);
 
       try {
         const response = await fetch(`/api/reports?${params}`);
+        console.log(response);
         const json = await response.json();
         setReports(json.data);
       } catch (error) {
-        console.error('Error fetching reports:', error);
+        console.error("Error fetching reports:", error);
       } finally {
         setLoading(false);
       }
@@ -105,7 +116,7 @@ function ReportsPage() {
   };
 
   const handleAccreditationChange = (value: string | null) => {
-    const apiValue = value === 'all' ? null : value;
+    const apiValue = value === "all" ? null : value;
     setPendingAccreditation(apiValue);
     if (!isMobile()) setAccreditation(apiValue);
   };
@@ -137,7 +148,7 @@ function ReportsPage() {
       <aside
         className={`
           fixed md:relative z-40 md:z-auto top-0 left-0 h-full
-          ${sidebarOpen ? 'translate-x-0 md:w-72' : '-translate-x-full md:translate-x-0 md:w-0'}
+          ${sidebarOpen ? "translate-x-0 md:w-72" : "-translate-x-full md:translate-x-0 md:w-0"}
           w-72 md:border-r border-slate-200 bg-white
           transition-all duration-300 ease-out overflow-hidden flex flex-col
         `}
@@ -183,12 +194,17 @@ function ReportsPage() {
                 placeholder="Título, abstract, tags..."
                 value={pendingSearch}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') closeSidebarOnMobile(); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") closeSidebarOnMobile();
+                }}
                 className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
               />
             </div>
             <button
-              onClick={() => { closeSidebarOnMobile(); setPendingSearch(''); }}
+              onClick={() => {
+                closeSidebarOnMobile();
+                setPendingSearch("");
+              }}
               className="md:hidden w-full mt-3 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors"
             >
               Buscar
@@ -202,10 +218,12 @@ function ReportsPage() {
             </label>
             <div className="relative">
               <select
-                value={pendingAccreditation === null ? 'all' : pendingAccreditation}
+                value={
+                  pendingAccreditation === null ? "all" : pendingAccreditation
+                }
                 onChange={(e) => {
                   const value = e.target.value;
-                  handleAccreditationChange(value === 'all' ? null : value);
+                  handleAccreditationChange(value === "all" ? null : value);
                   closeSidebarOnMobile();
                 }}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm appearance-none bg-white"
@@ -230,7 +248,7 @@ function ReportsPage() {
             </label>
             <div className="relative">
               <select
-                value={pendingBudgetRange || ''}
+                value={pendingBudgetRange || ""}
                 onChange={(e) => {
                   handleBudgetRangeChange(e.target.value || null);
                   closeSidebarOnMobile();
@@ -254,11 +272,12 @@ function ReportsPage() {
         {/* Results count */}
         <div className="border-t border-slate-100 px-6 py-4">
           <p className="text-sm text-slate-600">
-            <span className="font-semibold text-slate-900">{reports.length}</span>{' '}
+            <span className="font-semibold text-slate-900">
+              {reports?.length}
+            </span>{" "}
             informes encontrados
           </p>
         </div>
-
       </aside>
 
       {/* Desktop expand button (when sidebar is collapsed) */}
@@ -287,7 +306,9 @@ function ReportsPage() {
               <span className="text-sm font-medium">Filtros</span>
             </button>
           </div>
-          <h1 className="hidden sm:block text-3xl font-bold text-slate-900">Informes SROI</h1>
+          <h1 className="hidden sm:block text-3xl font-bold text-slate-900">
+            Informes SROI
+          </h1>
           <p className="hidden sm:block text-base text-slate-600 mt-1">
             Base de datos de informes de Retorno Social de la Inversión
           </p>
@@ -302,7 +323,7 @@ function ReportsPage() {
                 <p className="text-slate-600">Cargando informes...</p>
               </div>
             </div>
-          ) : reports.length === 0 ? (
+          ) : reports?.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center text-slate-500">
                 <p className="text-lg font-medium mb-1">No hay informes</p>
