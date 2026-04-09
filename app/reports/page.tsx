@@ -171,6 +171,7 @@ function ReportsPage() {
         </div>
         <div className="md:hidden flex justify-end p-4 border-b border-slate-100">
           <button
+            aria-label="cancel"
             onClick={() => setSidebarOpen(false)}
             className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
           >
@@ -218,6 +219,7 @@ function ReportsPage() {
             </label>
             <div className="relative">
               <select
+                aria-label="label for select"
                 value={
                   pendingAccreditation === null ? "all" : pendingAccreditation
                 }
@@ -248,6 +250,7 @@ function ReportsPage() {
             </label>
             <div className="relative">
               <select
+                aria-label="label for select"
                 value={pendingBudgetRange || ""}
                 onChange={(e) => {
                   handleBudgetRangeChange(e.target.value || null);
@@ -282,7 +285,7 @@ function ReportsPage() {
 
       {/* Desktop expand button (when sidebar is collapsed) */}
       {!sidebarOpen && (
-        <div className="hidden md:flex items-start pt-4 px-2 border-r border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-50">
+        <div className="hidden md:flex items-start pt-4 px-2 border-r border-slate-200 bg-linear-to-br from-slate-50 via-white to-slate-50">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"

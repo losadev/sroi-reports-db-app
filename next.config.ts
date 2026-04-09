@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { sources } from "next/dist/compiled/webpack/webpack";
 
 const nextConfig: NextConfig = {
   /* config options here */
